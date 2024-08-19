@@ -138,6 +138,8 @@ python -m PyQtInspect [--port N] [--client hostname] [--multiprocess] [--show-pq
 
 - PySide6无法选中一些控件
 
+- 对于一部分电脑, 有时候`QEnterEvent`的`type`会为`170`(`QEvent.DynamicPropertyChange`), 当程序访问`propertyNames`时会引发异常.
+
 ## 源代码
 
 目前可以在PyPi上直接下载源代码分布包(Source Distribution), Github仓库即将开放.
