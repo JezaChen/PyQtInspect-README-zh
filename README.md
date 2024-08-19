@@ -1,8 +1,13 @@
-<center>
+<div align="center">
 <img alt="icon.png" height="60" src="https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/icon.png?raw=true"/>
-</center>
-<center><h1>PyQtInspect</h1></center>
-<center>像Chrome元素检查工具一样检查PyQt/PySide程序元素</center>
+</div>
+<h1 align="center">PyQtInspect</h1>
+<p align="center">像Chrome元素检查工具一样检查PyQt/PySide程序元素</p>
+
+<p align="center">
+<a href="https://jeza-chen.com/PyqtInspect">英文文档</a> | 
+<a href="https://pypi.org/project/PyQtInspect/">PyPI</a>
+</p>
 
 对于使用Qt Widgets编写的PyQt/PySide程序, 如果界面并非通过QtDesigner生成, 
 我们查看程序中的控件信息、定位控件代码等操作是非常困难的, 很难像Chrome/Firefox浏览器那般轻松查看HTML的元素信息.
