@@ -13,6 +13,8 @@
 我们查看程序中的控件信息、定位控件代码等操作是非常困难的, 很难像Chrome/Firefox浏览器那般轻松查看HTML的元素信息.
 本项目旨在解决这个问题, 提供一个类似Chrome元素检查工具的PyQt/PySide程序元素检查工具.
 
+![hover and inspect](https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/hover_and_inspect.gif?raw=true)
+
 ## 要求
 
 - Python 3.7+
@@ -34,7 +36,7 @@
 
 ### 启动调试端
 
-直接在终端上输入`pqi-server`即可启动服务端GUI程序。启动后，指定监听端口(默认为19394)并点击`Serve`按钮启动服务端。
+直接在终端上输入`pqi-server`即可启动服务端GUI程序。启动后，指定监听端口(默认为`19394`)并点击`Serve`按钮启动服务端。
 
 <img alt="start_server.png" height="600" src="https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/start_server.png?raw=true"/>
 
@@ -59,12 +61,14 @@ python -m PyQtInspect [--port N] [--client hostname] [--multiprocess] [--show-pq
 * `--client`: 指定服务端监听地址, 默认为`127.0.0.1`
 * `--multiprocess`: 指定是否支持**多进程调试**, 默认不启用
 * `--show-pqi-stack`: 指定是否显示和PyQtInspect相关的调用栈, 默认不显示
-* `--qt-support`: 指定被调试程序使用的Qt框架, 默认为`pyqt5`
+* `--qt-support`: 指定被调试程序使用的Qt框架, 默认为`pyqt5`; 可选值为`pyqt5`, `pyside2`, `pyqt6`, `pyside6`
 * `--file`: 指定被调试程序的Python源代码文件路径
 * `file_args`: 被调试程序启动的命令行参数
 
 以调试[`PyQt-Fluent-Widgets`][1]为例, 其demo一般可使用`python examples/gallery/demo.py`来运行程序,
 此时可以使用`python -m PyQtInspect --file examples/gallery/demo.py`来启动PyQtInspect客户端.
+
+**注意: 只有PyQt5程序才无需`--qt-support``参数, 其他框架需要显示指定该参数!**
 
 #### 2. 用在PyCharm上
 
