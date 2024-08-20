@@ -144,7 +144,7 @@ python -m PyQtInspect [--port N] [--client hostname] [--multiprocess] [--show-pq
 
 - 对于一部分电脑, 有时候`QEnterEvent`的`type`会为`170`(`QEvent.DynamicPropertyChange`), 当程序访问`propertyNames`时会引发异常.
 
-**如果在使用过程中遇到问题, 在Github仓库开放前, 可以直接发邮件给我: jezachen@163.com**
+**如果在使用过程中遇到问题, 在Github仓库开放前, 可以直接发邮件给我: [`jezachen@163.com`](mailto:jezachen@163.com)**
 
 [1]: https://github.com/zhiyiYo/PyQt-Fluent-Widgets
 [2]: https://www.riverbankcomputing.com/pipermail/pyqt/2017-January/038650.html
