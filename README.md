@@ -131,6 +131,10 @@ python -m PyQtInspect [--port N] [--client hostname] [--multiprocess] [--show-pq
 
 对于一些很难通过鼠标点击选中的控件, 可以通过F8完成选中. 注意, F8仅用于检查过程中的结束选中, 在未开启检查的情况下按F8并不会开启选中.
 
+## 源代码
+
+目前可以在[PyPi][3]上直接下载源代码分布包(Source Distribution), Github仓库即将开放.
+
 ## 已知问题
 
 - **多继承两个以上的PyQt类会patch失效**, 例如`class A(B, C)`的情况, 其中`B`和`C`继承于`QObject`, 这样可能会导致`C`的`__init__`方法无法被执行, 从而引发异常.
@@ -140,9 +144,8 @@ python -m PyQtInspect [--port N] [--client hostname] [--multiprocess] [--show-pq
 
 - 对于一部分电脑, 有时候`QEnterEvent`的`type`会为`170`(`QEvent.DynamicPropertyChange`), 当程序访问`propertyNames`时会引发异常.
 
-## 源代码
-
-目前可以在PyPi上直接下载源代码分布包(Source Distribution), Github仓库即将开放.
+**如果在使用过程中遇到问题, 在Github仓库开放前, 可以直接发邮件给我: `jezachen@163.com``**
 
 [1]: https://github.com/zhiyiYo/PyQt-Fluent-Widgets
 [2]: https://www.riverbankcomputing.com/pipermail/pyqt/2017-January/038650.html
+[3]: https://pypi.org/project/PyQtInspect/#files
