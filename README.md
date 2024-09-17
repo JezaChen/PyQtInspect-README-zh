@@ -24,25 +24,69 @@
 
 使用`pip install PyQtInspect`安装即可.
 
-## 启动方式
+## 启动
 
 `PyQtInspect`架构分为两部分: 
 
-- 调试端/服务端: GUI程序，供使用者查看元素信息、定位代码等;
+- **调试端/服务端**: GUI程序，供使用者查看元素信息、定位代码等;
 
-- 被调试端/客户端: 运行在被调试的Python程序中，patch宿主程序的Python Qt框架, 将宿主程序的信息传递给GUI服务端等.
+- **被调试端/客户端**: 运行在被调试的Python程序中，patch宿主程序的Python Qt框架, 将宿主程序的信息传递给GUI服务端等.
 
-调试时, 需要先启动[GUI服务端](#启动调试端)，[再启动被调试的Python程序](#启动被调试端).
+### 启动模式
 
-### 启动调试端
+当前支持两种启动模式:
+
+- [**分离模式**](#分离模式启动): 先手动启动GUI服务端, 监听端口后, 再启动被调试端以连接服务端. **当被调试端关闭后, GUI服务端不会关闭.**
+
+- [**直接模式**](#直接模式启动): 直接启动被调试端, **并同时在本机启动**一个GUI服务端(无须事先启动服务端和监听). **当被调试端关闭后, GUI服务端也会关闭.**
+
+注意，直接模式下，每创建一个被调试端(客户端)的同时，都会创建一个服务端(服务端), 属于一对一的关系. 
+此外, 在直接模式下, 用户无法手动指定服务端的监听[README.md](..%2FREADME.md)端口, 关闭连接, 以及Attach进程的操作. 
+
+分离模式调试支持远程调试(服务端和客户端不在同一台机器上), 直接模式下由于自动启动的服务端和客户端在同一台机器上, 所以不支持远程调试.
+
+此外, PyQtInspect还支持[在PyCharm等IDE上运行](#在pycharm等ide上运行pyqtinspect-支持分离模式直接模式),
+以及[通过Attach进程的方式附加到PyQt/PySide进程中进行调试](#attach进程仅支持分离模式-目前不稳定).
+
+### 直接模式启动
+
+目前**推荐**的启动方法, 会同时启动PyQtInspect服务端和客户端, 需要**使用者拥有被调试程序的Python源代码**.
+
+如果平时通过`python xxx.py param1 param2`运行**PyQt5程序**, 则仅需要在`python`和`xxx.py`中间加入`-m PyQtInspect --direct --file`参数,
+如`python -m PyQtInspect --direct --file xxx.py param1 param2`, 即可启动PyQtInspect客户端.
+
+如果被调试程序使用的是**PySide2/PyQt6/Pyside6**, 则需要继续添加`--qt-support`参数, 指定对应的Qt框架.
+如被调试程序使用的是PySide2, 则完整的启动命令为`python -m PyQtInspect --direct --file xxx.py --qt-support=pyside2 param1 param2`.
+
+完整的启动命令为:
+
+```powershell
+python -m PyQtInspect --direct [--multiprocess] [--show-pqi-stack] [--qt-support=[pyqt5|pyside2|pyqt6|pyside6]] --file executable_file [file_args]
+```
+
+每个参数的含义如下:
+
+* `--direct`: 指定启动模式为**直接模式**
+* `--multiprocess`: 指定是否支持**多进程调试**, 默认不启用
+* `--show-pqi-stack`: 指定是否显示和PyQtInspect相关的调用栈, 默认不显示
+* `--qt-support`: 指定被调试程序使用的Qt框架, 默认为`pyqt5`
+* `--file`: 指定被调试程序的Python源代码文件路径
+* `file_args`: 被调试程序启动的命令行参数
+
+以调试[`PyQt-Fluent-Widgets`][1]的**PySide2版本**为例, 其demo一般可使用`python examples/gallery/demo.py`来运行程序,
+此时可以使用`python -m PyQtInspect --direct --qt-support=pyside2 --file examples/gallery/demo.py`以直接模式同时启动PyQtInspect客户端和服务端.
+
+### 分离模式启动
+
+通过分离模式调试时, 务必先启动GUI服务端，再启动被调试的Python程序.
+
+#### 启动调试端
 
 直接在终端上输入`pqi-server`即可启动服务端GUI程序。启动后，指定监听端口(默认为`19394`)并点击`Serve`按钮启动服务端。
 
 <img alt="start_server.png" height="600" src="https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/start_server.png?raw=true"/>
 
-### 启动被调试端
-
-#### 1. 运行程序python源代码时附带PyQtInspect
+#### 启动被调试端: 运行程序源代码时附带PyQtInspect
 
 目前**推荐**的启动方法, 需要使用者拥有被调试程序的Python源代码.
 
@@ -65,10 +109,15 @@ python -m PyQtInspect [--port N] [--client hostname] [--multiprocess] [--show-pq
 * `--file`: 指定被调试程序的Python源代码文件路径
 * `file_args`: 被调试程序启动的命令行参数
 
-以调试[`PyQt-Fluent-Widgets`][1]为例, 其demo一般可使用`python examples/gallery/demo.py`来运行程序,
-此时可以使用`python -m PyQtInspect --file examples/gallery/demo.py`来启动PyQtInspect客户端.
+以调试[`PyQt-Fluent-Widgets`][1]的**PySide2版本**为例, 其demo一般可使用`python examples/gallery/demo.py`来运行程序,
+此时可以使用`python -m PyQtInspect --qt-support=pyside2 --file examples/gallery/demo.py`来启动PyQtInspect客户端. 
+**调试前, 再三强调请确保服务端已经启动, 并已经监听了`19394`端口.**
 
 **注意: 只有PyQt5程序才无需`--qt-support``参数, 其他框架需要显示指定该参数!**
+
+### 其他运行方式
+
+#### 在PyCharm等IDE上运行PyQtInspect (支持分离模式/直接模式)
 
 #### 2. 用在PyCharm上
 
@@ -80,9 +129,9 @@ python -m PyQtInspect [--port N] [--client hostname] [--multiprocess] [--show-pq
 
 然后直接Run/Debug即可.
 
-#### 3. Attach进程(目前不稳定)
+#### Attach进程(仅支持分离模式, 目前不稳定)
 
-如果没有被调试程序的源代码, 可以通过Attach进程的方式**尝试**启动PyQtInspect客户端.
+如果**没有被调试程序的源代码,** 可以通过Attach进程的方式**尝试**启动PyQtInspect客户端.
 
 点击`More->Attach To Process`, 选择被调试程序的进程窗口, 点击Attach按钮即可. 
 
