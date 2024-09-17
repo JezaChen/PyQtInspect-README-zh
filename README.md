@@ -88,7 +88,7 @@ python -m PyQtInspect --direct [--multiprocess] [--show-pqi-stack] [--qt-support
 
 #### 启动被调试端: 运行程序源代码时附带PyQtInspect
 
-目前**推荐**的启动方法, 需要使用者拥有被调试程序的Python源代码.
+前提: 需要使用者拥有被调试程序的Python源代码.
 
 如果平时通过`python xxx.py param1 param2`运行程序, 则仅需要在`python`和`xxx.py`中间加入`-m PyQtInspect --file`参数,
 如`python -m PyQtInspect --file xxx.py param1 param2`, 即可启动PyQtInspect客户端.
