@@ -119,8 +119,6 @@ python -m PyQtInspect [--port N] [--client hostname] [--multiprocess] [--show-pq
 
 #### 在PyCharm等IDE上运行PyQtInspect (支持分离模式/直接模式)
 
-#### 2. 用在PyCharm上
-
 直接在PyCharm调试PyQtInspect Module即可, 不影响对程序的调试.
 
 还是以[`PyQt-Fluent-Widgets`][1]为例, 可以新增一个Debug配置, 参数如下:
