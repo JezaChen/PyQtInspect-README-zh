@@ -5,6 +5,7 @@
 <p align="center">像Chrome元素检查工具一样检查PyQt/PySide程序元素</p>
 
 <p align="center">
+<a href="https://github.com/JezaChen/PyQtInspect-Open">源代码</a> |
 <a href="https://jeza-chen.com/PyqtInspect">英文文档</a> | 
 <a href="https://pypi.org/project/PyQtInspect/">PyPI</a>
 </p>
@@ -181,10 +182,6 @@ python -m PyQtInspect [--port N] [--client hostname] [--multiprocess] [--show-pq
 ### F8强力选中(默认打开, 需要关闭前往 More->Press F8 to Finish Inspect取消)
 
 对于一些很难通过鼠标点击选中的控件, 可以通过F8完成选中. 注意, F8仅用于检查过程中的结束选中, 在未开启检查的情况下按F8并不会开启选中.
-
-## 源代码
-
-目前可以在[PyPi][3]上直接下载源代码分布包(Source Distribution), Github仓库即将开放.
 
 ## 已知问题
 
