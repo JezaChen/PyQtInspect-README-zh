@@ -70,12 +70,17 @@ python -m PyQtInspect --direct [--multiprocess] [--show-pqi-stack] [--qt-support
 * `--direct`: 指定启动模式为**直接模式**
 * `--multiprocess`: 指定是否支持**多进程调试**, 默认不启用
 * `--show-pqi-stack`: 指定是否显示和PyQtInspect相关的调用栈, 默认不显示
-* `--qt-support`: 指定被调试程序使用的Qt框架, 默认为`pyqt5`
+* `--qt-support`: 指定被调试程序使用的Qt框架, 默认为`auto`; 可选值为`auto`, `pyqt5`, `pyside2`, `pyqt6`, `pyside6`.
+  > `auto`表示由PyQtInspect自动识别被调试程序使用的Qt框架, 其基于被调试程序的import语句来判断.
 * `--file`: 指定被调试程序的Python源代码文件路径
 * `file_args`: 被调试程序启动的命令行参数
 
-以调试[`PyQt-Fluent-Widgets`][1]的**PySide2版本**为例, 其demo一般可使用`python examples/gallery/demo.py`来运行程序,
-此时可以使用`python -m PyQtInspect --direct --qt-support=pyside2 --file examples/gallery/demo.py`以直接模式同时启动PyQtInspect客户端和服务端.
+以调试[`PyQt-Fluent-Widgets`][1]为例, 其demo可使用`python examples/gallery/demo.py`来运行程序,
+此时可以使用`python -m PyQtInspect --direct --file examples/gallery/demo.py`以直接模式同时启动PyQtInspect客户端和服务端.
+
+> 注1: 自版本0.4.0开始, `--qt-support`的默认参数由`pyqt5`改为`auto`, 意味着PyQtInspect会自动识别被调试程序使用的Qt框架, 无需手动指定.
+> 
+> 注2: 当使用PyCharm等基于pydevd框架的IDE进行调试时, 务必保证IDE中的['PyQt compatible'选项][4]设置为项目使用的Qt框架, 否则可能会导致PyQtInspect无法正常工作乃至程序崩溃.
 
 ### 分离模式启动
 
@@ -106,15 +111,18 @@ python -m PyQtInspect [--port N] [--client hostname] [--multiprocess] [--show-pq
 * `--client`: 指定服务端监听地址, 默认为`127.0.0.1`
 * `--multiprocess`: 指定是否支持**多进程调试**, 默认不启用
 * `--show-pqi-stack`: 指定是否显示和PyQtInspect相关的调用栈, 默认不显示
-* `--qt-support`: 指定被调试程序使用的Qt框架, 默认为`pyqt5`; 可选值为`pyqt5`, `pyside2`, `pyqt6`, `pyside6`
+* `--qt-support`: 指定被调试程序使用的Qt框架, 默认为`auto`; 可选值为`auto`, `pyqt5`, `pyside2`, `pyqt6`, `pyside6`.
+  > `auto`表示由PyQtInspect自动识别被调试程序使用的Qt框架, 其基于被调试程序的import语句来判断.
 * `--file`: 指定被调试程序的Python源代码文件路径
 * `file_args`: 被调试程序启动的命令行参数
 
-以调试[`PyQt-Fluent-Widgets`][1]的**PySide2版本**为例, 其demo一般可使用`python examples/gallery/demo.py`来运行程序,
-此时可以使用`python -m PyQtInspect --qt-support=pyside2 --file examples/gallery/demo.py`来启动PyQtInspect客户端. 
-**调试前, 再三强调请确保服务端已经启动, 并已经监听了`19394`端口.**
+以调试[`PyQt-Fluent-Widgets`][1]为例, 其demo可使用`python examples/gallery/demo.py`来运行程序,
+如果我们需要将其作为PyQtInspect的被调试端并连接调试端, 可以使用`python -m PyQtInspect --file examples/gallery/demo.py`.
+**调试前, 再三强调请确保服务端已经启动, 并已经监听了`19394`端口. (因为不指定`--port`的情况下，默认连接`19394`端口)**
 
-**注意: 只有PyQt5程序才无需`--qt-support``参数, 其他框架需要显示指定该参数!**
+> 注1: 自版本0.4.0开始, `--qt-support`的默认参数由`pyqt5`改为`auto`, 意味着PyQtInspect会自动识别被调试程序使用的Qt框架, 无需手动指定.
+> 
+> 注2: 当使用PyCharm等基于pydevd框架的IDE进行调试时, 务必保证IDE中的['PyQt compatible'选项][4]设置为项目使用的Qt框架, 否则可能会导致PyQtInspect无法正常工作乃至程序崩溃.
 
 ### 其他运行方式
 
@@ -192,8 +200,14 @@ python -m PyQtInspect [--port N] [--client hostname] [--multiprocess] [--show-pq
 
 - 对于一部分电脑, 有时候`QEnterEvent`的`type`会为`170`(`QEvent.DynamicPropertyChange`), 当程序访问`propertyNames`时会引发异常.
 
-**如果在使用过程中遇到问题, 在Github仓库开放前, 可以直接发邮件给我: [`jezachen@163.com`](mailto:jezachen@163.com)**
+## 更新日志
+
+### 0.4.0
+
+- 基于[ihook][5], `--qt-support`参数新增`auto`选项, 使得PyQtInspect支持根据程序import语句自动识别Qt框架, 无需手动指定.
 
 [1]: https://github.com/zhiyiYo/PyQt-Fluent-Widgets
 [2]: https://www.riverbankcomputing.com/pipermail/pyqt/2017-January/038650.html
 [3]: https://pypi.org/project/PyQtInspect/#files
+[4]: https://www.jetbrains.com/help/pycharm/debugger-python.html
+[5]: https://github.com/JezaChen/ihook
