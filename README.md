@@ -191,6 +191,12 @@ python -m PyQtInspect [--port N] [--client hostname] [--multiprocess] [--show-pq
 
 对于一些很难通过鼠标点击选中的控件, 可以通过F8完成选中. 注意, F8仅用于检查过程中的结束选中, 在未开启检查的情况下按F8并不会开启选中.
 
+### 控件树查看
+
+点击菜单上的 `View->Control Tree`，可以查看当前所选控件所在进程的控件树结构。单击（或者hover）树中的行可以高亮对应的控件。
+
+![control tree](https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/control_tree.gif?raw=true)
+
 ## 已知问题
 
 - **多继承两个以上的PyQt类会patch失效**, 例如`class A(B, C)`的情况, 其中`B`和`C`继承于`QObject`, 这样可能会导致`C`的`__init__`方法无法被执行, 从而引发异常.
