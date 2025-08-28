@@ -10,16 +10,17 @@
 <a href="https://pypi.org/project/PyQtInspect/">PyPI</a>
 </p>
 
-对于使用Qt Widgets编写的PyQt/PySide程序, 如果界面并非通过QtDesigner生成, 
-我们查看程序中的控件信息、定位控件代码等操作是非常困难的, 很难像Chrome/Firefox浏览器那般轻松查看HTML的元素信息.
-本项目旨在解决这个问题, 提供一个类似Chrome元素检查工具的PyQt/PySide程序元素检查工具.
+对于使用Qt Widgets编写的PyQt/PySide程序,
+我们很难在运行时查看程序中的控件信息、定位控件代码, 无法做到像前端开发那样, 在浏览器中通过开发者工具轻松选择HTML元素, 定位代码及查看信息.
 
-![hover and inspect](https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/hover_and_inspect.gif?raw=true)
+本项目旨在解决这个问题, 提供类似Chrome DevTools的PyQt/PySide程序元素检查工具, 提高学习, 开发及调试效率.
+
+![hover and inspect](https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/0.4.0/overview.gif?raw=true)
 
 ## 要求
 
 - Python 3.7+
-- 安装有以下Qt for Python的框架: PyQt5/PySide2/PyQt6/Pyside6
+- 已安装以下Qt for Python的框架: PyQt5/PySide2/PyQt6/Pyside6
 
 ## 安装
 
@@ -29,100 +30,98 @@
 
 `PyQtInspect`架构分为两部分: 
 
-- **调试端/服务端**: GUI程序，供使用者查看元素信息、定位代码等;
+- **调试端/服务端**: GUI程序, 供开发者直观地查看元素信息、定位代码等;
 
-- **被调试端/客户端**: 运行在被调试的Python程序中，patch宿主程序的Python Qt框架, 将宿主程序的信息传递给GUI服务端等.
+- **被调试端/客户端**: 运行在被调试的Python程序中，patch宿主程序的Python Qt框架, 响应调试端的请求以及将宿主程序的信息传递给调试端等.
 
 ### 启动模式
 
 当前支持两种启动模式:
 
-- [**分离模式**](#分离模式启动): 先手动启动GUI服务端, 监听端口后, 再启动被调试端以连接服务端. **当被调试端关闭后, GUI服务端不会关闭.**
+- [**分离模式**](#分离模式启动-传统方法-一对多调试): 先手动启动GUI服务端, 再启动被调试端以连接服务端. **被调试端关闭后, GUI服务端不会关闭.**
 
-- [**直接模式**](#直接模式启动): 直接启动被调试端, **并同时在本机启动**一个GUI服务端(无须事先启动服务端和监听). **当被调试端关闭后, GUI服务端也会关闭.**
+- [**直接模式 (推荐)**](#直接模式启动-便捷方法-推荐): 仅需启动被调试端, 被调试端会自行**在本机启动**一个GUI服务端(无须开发者事先手动启动服务端). **被调试端关闭后会一同关闭GUI服务端.**
 
 注意，直接模式下，每创建一个被调试端(客户端)的同时，都会创建一个服务端(服务端), 属于一对一的关系. 
-此外, 在直接模式下, 用户无法手动指定服务端的监听[README.md](..%2FREADME.md)端口, 关闭连接, 以及Attach进程的操作. 
+此外, 在直接模式下, 用户无法手动指定监听端口、关闭连接以及Attach进程等操作. 
 
 分离模式调试支持远程调试(服务端和客户端不在同一台机器上), 直接模式下由于自动启动的服务端和客户端在同一台机器上, 所以不支持远程调试.
 
 此外, PyQtInspect还支持[在PyCharm等IDE上运行](#在pycharm等ide上运行pyqtinspect-支持分离模式直接模式),
 以及[通过Attach进程的方式附加到PyQt/PySide进程中进行调试](#attach进程仅支持分离模式-目前不稳定).
 
-### 直接模式启动
+### 直接模式启动 (便捷方法, 推荐👍)
 
-目前**推荐**的启动方法, 会同时启动PyQtInspect服务端和客户端, 需要**使用者拥有被调试程序的Python源代码**.
+目前**推荐**的启动方法, 一步即可同时启动PyQtInspect服务端和客户端, 需要**使用者拥有被调试程序的Python源代码**.
 
-如果平时通过`python xxx.py param1 param2`运行**PyQt5程序**, 则仅需要在`python`和`xxx.py`中间加入`-m PyQtInspect --direct --file`参数,
-如`python -m PyQtInspect --direct --file xxx.py param1 param2`, 即可启动PyQtInspect客户端.
+如果你是通过`python xxx.py param1 param2`来运行你的**PyQt5**程序, 则仅需在`python`和`xxx.py`中间加入`-m PyQtInspect --direct --file`参数,
+如`python -m PyQtInspect --direct --file xxx.py param1 param2`, 即可启动PyQtInspect调试.
 
-如果被调试程序使用的是**PySide2/PyQt6/Pyside6**, 则需要继续添加`--qt-support`参数, 指定对应的Qt框架.
-如被调试程序使用的是PySide2, 则完整的启动命令为`python -m PyQtInspect --direct --file xxx.py --qt-support=pyside2 param1 param2`.
+如果被调试程序使用的是**PySide2/PyQt6/Pyside6**, 则需要额外添加`--qt-support`参数, 以指定对应的Qt框架.
+举个例子, 如被调试程序使用的是PySide2, 则启动命令为`python -m PyQtInspect --direct --qt-support=pyside2 --file xxx.py param1 param2`.
 
 完整的启动命令为:
 
 ```powershell
-python -m PyQtInspect --direct [--multiprocess] [--show-pqi-stack] [--qt-support=[pyqt5|pyside2|pyqt6|pyside6]] --file executable_file [file_args]
+python -m PyQtInspect --direct [--multiprocess] [--show-pqi-stack] [--qt-support=[pyqt5|pyside2|pyqt6|pyside6]] --file py_file [file_args]
 ```
 
-每个参数的含义如下:
+各参数的含义如下:
 
 * `--direct`: 指定启动模式为**直接模式**
 * `--multiprocess`: 指定是否支持**多进程调试**, 默认不启用
 * `--show-pqi-stack`: 指定是否显示和PyQtInspect相关的调用栈, 默认不显示
-* `--qt-support`: 指定被调试程序使用的Qt框架, 默认为`auto`; 可选值为`auto`, `pyqt5`, `pyside2`, `pyqt6`, `pyside6`.
-  > `auto`表示由PyQtInspect自动识别被调试程序使用的Qt框架, 其基于被调试程序的import语句来判断.
+* `--qt-support`: 指定被调试程序使用的Qt框架, 默认为`pyqt5`; 可选值为`pyqt5`, `pyside2`, `pyqt6`, `pyside6`.
 * `--file`: 指定被调试程序的Python源代码文件路径
 * `file_args`: 被调试程序启动的命令行参数
 
 以调试[`PyQt-Fluent-Widgets`][1]为例, 其demo可使用`python examples/gallery/demo.py`来运行程序,
-此时可以使用`python -m PyQtInspect --direct --file examples/gallery/demo.py`以直接模式同时启动PyQtInspect客户端和服务端.
+此时可以使用`python -m PyQtInspect --direct --file examples/gallery/demo.py`以直接模式启动PyQtInspect调试器.
 
-> 注1: 自版本0.4.0开始, `--qt-support`的默认参数由`pyqt5`改为`auto`, 意味着PyQtInspect会自动识别被调试程序使用的Qt框架, 无需手动指定.
-> 
-> 注2: 当使用PyCharm等基于pydevd框架的IDE进行调试时, 务必保证IDE中的['PyQt compatible'选项][4]设置为项目使用的Qt框架, 否则可能会导致PyQtInspect无法正常工作乃至程序崩溃.
+> 注: 当使用PyCharm等基于pydevd框架的IDE进行调试时, **务必保证IDE中的['PyQt compatible'选项][4]设置为项目使用的Qt框架**, 否则可能会导致PyQtInspect无法正常工作乃至程序崩溃.
 
-### 分离模式启动
+### 分离模式启动 (传统方法, 一对多调试)
 
 通过分离模式调试时, 务必先启动GUI服务端，再启动被调试的Python程序.
 
-#### 启动调试端
+#### 启动调试端 (服务端)
 
-直接在终端上输入`pqi-server`即可启动服务端GUI程序。启动后，指定监听端口(默认为`19394`)并点击`Serve`按钮启动服务端。
+在终端上输入`pqi-server`即可启动服务端GUI程序。启动后，指定监听端口(默认为`19394`)并点击`Serve`按钮启动服务端。
 
-<img alt="start_server.png" height="600" src="https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/start_server.png?raw=true"/>
+<img alt="start_server.png" height="600" src="https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/0.4.0/start_server.png?raw=true"/>
 
-#### 启动被调试端: 运行程序源代码时附带PyQtInspect
+#### 启动被调试端 (客户端): 运行程序源代码时附带PyQtInspect
 
 前提: 需要使用者拥有被调试程序的Python源代码.
 
-如果平时通过`python xxx.py param1 param2`运行程序, 则仅需要在`python`和`xxx.py`中间加入`-m PyQtInspect --file`参数,
-如`python -m PyQtInspect --file xxx.py param1 param2`, 即可启动PyQtInspect客户端.
+类似直接模式, 如果你是通过`python xxx.py param1 param2`来运行你的**PyQt5**程序, 则仅需在`python`和`xxx.py`中间加入`-m PyQtInspect --file`参数,
+如`python -m PyQtInspect --file xxx.py param1 param2`, 即可启动PyQtInspect调试.
+
+类似地, 如果被调试程序使用的是**PySide2/PyQt6/Pyside6**, 同样需要额外添加`--qt-support`参数, 以指定对应的Qt框架.
+举个例子, 如被调试程序使用的是PySide2, 此时的启动命令为`python -m PyQtInspect --qt-support=pyside2 --file xxx.py param1 param2`.
 
 完整的启动命令为:
 
 ```powershell
-python -m PyQtInspect [--port N] [--client hostname] [--multiprocess] [--show-pqi-stack] [--qt-support=[pyqt5|pyside2|pyqt6|pyside6]] --file executable_file [file_args]
+python -m PyQtInspect [--port N] [--client hostname] [--multiprocess] [--show-pqi-stack] [--qt-support=[pyqt5|pyside2|pyqt6|pyside6]] --file py_file [file_args]
 ```
 
-每个参数的含义如下:
+各参数的含义如下:
 
 * `--port`: 指定服务端监听端口, 默认为`19394`
 * `--client`: 指定服务端监听地址, 默认为`127.0.0.1`
 * `--multiprocess`: 指定是否支持**多进程调试**, 默认不启用
 * `--show-pqi-stack`: 指定是否显示和PyQtInspect相关的调用栈, 默认不显示
-* `--qt-support`: 指定被调试程序使用的Qt框架, 默认为`auto`; 可选值为`auto`, `pyqt5`, `pyside2`, `pyqt6`, `pyside6`.
-  > `auto`表示由PyQtInspect自动识别被调试程序使用的Qt框架, 其基于被调试程序的import语句来判断.
+* `--qt-support`: 指定被调试程序使用的Qt框架, 默认为`pyqt5`; 可选值为`pyqt5`, `pyside2`, `pyqt6`, `pyside6`.
 * `--file`: 指定被调试程序的Python源代码文件路径
 * `file_args`: 被调试程序启动的命令行参数
 
-以调试[`PyQt-Fluent-Widgets`][1]为例, 其demo可使用`python examples/gallery/demo.py`来运行程序,
-如果我们需要将其作为PyQtInspect的被调试端并连接调试端, 可以使用`python -m PyQtInspect --file examples/gallery/demo.py`.
-**调试前, 再三强调请确保服务端已经启动, 并已经监听了`19394`端口. (因为不指定`--port`的情况下，默认连接`19394`端口)**
+同样以调试[`PyQt-Fluent-Widgets`][1]为例,
+如果当前GUI调试端已在本机启动(监听地址为默认值`127.0.0.1`)并监听了`19394`端口(默认值),
+我们可以使用`python -m PyQtInspect --file examples/gallery/demo.py`启动被调试端. 
+(因为服务端的地址和端口均为默认值, 所以不需要额外指定`--client`和`--port`参数)
 
-> 注1: 自版本0.4.0开始, `--qt-support`的默认参数由`pyqt5`改为`auto`, 意味着PyQtInspect会自动识别被调试程序使用的Qt框架, 无需手动指定.
-> 
-> 注2: 当使用PyCharm等基于pydevd框架的IDE进行调试时, 务必保证IDE中的['PyQt compatible'选项][4]设置为项目使用的Qt框架, 否则可能会导致PyQtInspect无法正常工作乃至程序崩溃.
+> 注: 当使用PyCharm等基于pydevd框架的IDE进行调试时, 务必保证IDE中的['PyQt compatible'选项][4]设置为项目使用的Qt框架, 否则可能会导致PyQtInspect无法正常工作乃至程序崩溃.
 
 ### 其他运行方式
 
@@ -142,60 +141,67 @@ python -m PyQtInspect [--port N] [--client hostname] [--multiprocess] [--show-pq
 
 点击`More->Attach To Process`, 选择被调试程序的进程窗口, 点击Attach按钮即可. 
 
-**注意**: 此时对于大多数控件是**拿不到创造时的调用栈信息**, 除非是Attach后创建的.
+**注意**: 对于大多数控件而言, 此时是**拿不到它们创造时的调用栈信息**, 除非是Attach后创建的.
 
-![attach process](https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/attach_process.gif?raw=true)
+![attach process](https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/0.4.0/attach_process.gif?raw=true)
 
 ## 使用方式
 
-### 检查元素信息
+### 选择元素
 
-点击Inspect按钮, 将鼠标hover到需要检查的控件上, 即可预览控件的信息.
+点击Select按钮即可选择元素, 将鼠标hover到需要检查的控件上, 高亮控件的同时亦可预览控件的简要信息(类名, 对象名, 大小, 相对位置, 样式).
 
-![hover and inspect](https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/hover_and_inspect.gif?raw=true)
+单击鼠标左键后可选中该控件. 此时可以对控件进行更详细的检查, 比如查看并定位其初始化时的调用栈、在内部执行代码、查看层次信息、控件树定位以及查看属性等操作.
 
-如果需要选中该控件, 单击鼠标左键, 以完成选中. 此时可以对控件进行创建时调用栈定位、执行代码、查看层次信息等操作.
+![hover and inspect](https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/0.4.0/select_and_click.gif?raw=true)
 
-![then click](https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/then_click.gif?raw=true)
+### 查看控件的属性
 
-### 调用栈定位
+控件简要信息区下方的第二个选项卡页是该控件的详细属性信息, 按控件类继承关系和属性的类型进行层次化展示.
 
-控件信息区下方是创建该控件时的调用栈，点击可以拉起Pycharm定位到对应的文件和行.
+<img alt="detailed_props" src="https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/0.4.0/detailed_props.png?raw=true" width="350"/>
 
-![create stacks](https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/create_stacks.gif?raw=true)
+### 查看控件初始化时的调用栈
 
-如果拉起Pycharm失败, 可以在More->Settings中设置Pycharm的路径.
+控件简要信息区下方的第一个选项卡页是该控件初始化时的调用栈，双击可以拉起PyCharm定位到对应的文件和行.
 
-**p.s.对于通过Attach进程方式启动的PyQtInspect客户端, 如果Attach过程中控件已经创建好了, 此时是拿不到创建时的信息的, 该调用栈区域为空**
+![create stacks](https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/0.4.0/create_stack.gif?raw=true)
+
+如果拉起PyCharm失败, 可以在More->Settings中设置PyCharm的路径.
+
+**p.s.对于通过[Attach进程方式](#attach进程仅支持分离模式-目前不稳定)启动的PyQtInspect客户端, 如果Attach过程中控件已经创建好了, 此时是拿不到创建时的信息, 调用栈信息为空**
 
 ### 执行代码
 
-控件选中后, 点击Run Code按钮, 可在选中控件的作用域内执行代码(其中选中控件实例为`self`, 实际上就是在控件的一个方法内执行代码).
+控件选中后, 点击Run Code按钮, 可在所选控件的作用域内执行代码(其中控件实例为`self`, 本质就是在控件对象内部的一个方法内执行代码).
 
-![run codes](https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/run_codes.gif?raw=true)
+![run code](https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/0.4.0/run_code.gif?raw=true)
 
 ### 查看层次信息
 
-工具下方有层次关系导航条, 可以直接查看、高亮、定位选中控件的祖先控件和子控件, 方便使用者在控件的层次中来回切换.
+工具最下方为层次关系导航条, 可以查看、高亮、定位所选控件的祖先控件和子控件, 方便使用者在控件的层次中来回切换.
 因此，结合已有的鼠标选中，用户可做到更精细的选择。
 
-![inspect hierarchy](https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/inspect_hierarchy.gif?raw=true)
+![inspect hierarchy](https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/0.4.0/inspect_hierarchy.gif?raw=true)
 
-### 检查过程中, 使用右键点击模拟左键点击(默认打开, 需要关闭前往 More->Mock Right Button Down as Left取消)
+### 选择过程中, 使用右键点击模拟左键点击 (默认打开, 需要关闭请前往 More->Mock Right Button Down as Left When Selecting Elements 取消)
 
-由于一些控件需要左键点击后才能显示, 为了方便检查, 可以通过右键点击模拟左键点击.
+由于一些控件需要左键点击后才能显示, 为了方便选择, 可以通过右键点击的方式模拟左键点击.
 
-![mock right button as left](https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/mock_right_btn_as_left.gif?raw=true)
+**p.s. 该功能仅当选择过程中开启.**
 
-### F8强力选中(默认打开, 需要关闭前往 More->Press F8 to Finish Inspect取消)
+![mock right button as left](https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/0.4.0/mock_right_btn_as_left.gif?raw=true)
 
-对于一些很难通过鼠标点击选中的控件, 可以通过F8完成选中. 注意, F8仅用于检查过程中的结束选中, 在未开启检查的情况下按F8并不会开启选中.
+### F8强力选中 (默认打开, 需要关闭请前往 More->Press F8 to Finish Selecting 取消)
+
+对于一些很难通过鼠标点击选中的控件, 可以通过F8完成选中. 注意, F8仅用于结束选择, 在未开启选择的情况下按F8并不会开启选择.
 
 ### 控件树查看
 
-点击菜单上的 `View->Control Tree`，可以查看当前所选控件所在进程的控件树结构。单击（或者hover）树中的行可以高亮对应的控件。
+点击菜单上的 `View->Control Tree`, 可以查看当前所选控件所在进程的控件树结构.
+单击(或者hove)树中的行可以高亮对应的控件.
 
-![control tree](https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/control_tree.gif?raw=true)
+![control tree](https://github.com/JezaChen/PyQtInspect-README-Assets/blob/main/Images/0.4.0/control_tree.gif?raw=true)
 
 ## 已知问题
 
@@ -210,7 +216,9 @@ python -m PyQtInspect [--port N] [--client hostname] [--multiprocess] [--show-pq
 
 ### 0.4.0
 
-- 基于[ihook][5], `--qt-support`参数新增`auto`选项, 使得PyQtInspect支持根据程序import语句自动识别Qt框架, 无需手动指定.
+- 新增控件详细属性选项卡页
+- 在Toolbar上新增打开日志和清空日志入口
+- 修复一系列问题
 
 [1]: https://github.com/zhiyiYo/PyQt-Fluent-Widgets
 [2]: https://www.riverbankcomputing.com/pipermail/pyqt/2017-January/038650.html
